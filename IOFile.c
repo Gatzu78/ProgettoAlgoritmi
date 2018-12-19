@@ -9,8 +9,8 @@
  */
 FILE* openFile(FILE *fp, char *nameFile, bool compressName){
     if(fp == NULL){
-        char *type = ".funn";
-        char *name = malloc (strlen(nameFile) + strlen(type) + 1);;
+        char *type = ".tiff";
+        char *name = malloc (12);;
         strcat(name, nameFile);
         strcat(name, type);
         return fopen(name, "wb");
@@ -20,8 +20,8 @@ FILE* openFile(FILE *fp, char *nameFile, bool compressName){
 
 FILE* readFile(FILE *fp, char *nameFile){
     if(fp == NULL){
-        char *type = ".funn";
-        char *name = malloc (strlen(nameFile) + strlen(type) + 1);;
+        char *type = ".funny";
+        char *name = malloc (12);;
         strcat(name, nameFile);
         strcat(name, type);
         return fopen(name, "rb");

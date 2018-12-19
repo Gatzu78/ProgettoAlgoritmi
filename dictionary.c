@@ -15,7 +15,7 @@ bool hasNext(node current){
     return true;
 }
 
-node getDictionaryByKey(node head, char key){
+node getDictionaryByKey(node head, unsigned char key){
     if(head==NULL){
         return NULL;
     }
@@ -44,7 +44,7 @@ node getLastNode(node head){
     return head;
 }
 
-int printDictionary(node head){
+long printDictionary(node head){
     if(head==NULL){
         return 1;
     }
@@ -101,7 +101,7 @@ node insertionSort(node head){
     return head;
 }
 
-node addNode(node head, char key, int value){
+node addNode(node head, unsigned char key, long value){
     node temp = createNode();
     node last = getLastNode(head);
     temp->key = key;
@@ -115,7 +115,7 @@ node addNode(node head, char key, int value){
     return head;
 }
 
-node incrementValue(node head, char chiave){
+node incrementValue(node head, unsigned char chiave){
     node diz = getDictionaryByKey(head, chiave);
     if(diz != NULL){
         diz->value=diz->value+1;
@@ -125,7 +125,7 @@ node incrementValue(node head, char chiave){
     return head;
 }
 
-int getTotFrequency(node head){
+long getTotFrequency(node head){
     int current = 0;
     while(head!=NULL){
         current += head->value;

@@ -8,7 +8,7 @@
 #include <stdbool.h>
 #include "huffman_table.h"
 
-nodeHuffman getHuffmanNodeByKey(nodeHuffman arr[], int arr_size, char key){
+nodeHuffman getHuffmanNodeByKey(nodeHuffman arr[], int arr_size, unsigned char key){
     for(int i=0; i<arr_size;i++){
         if(arr[i] == NULL){
             break;
@@ -28,7 +28,7 @@ void printHuffmanTable(nodeHuffman arr[], int arr_size){
     }
 }
 
-nodeHuffman createNodeHuffman(char key, char *coded){
+nodeHuffman createNodeHuffman(unsigned char key, char *coded){
     nodeHuffman temp;
     temp = (nodeHuffman)malloc(sizeof(struct HuffmanTable));
     temp->key = key;
@@ -38,7 +38,8 @@ nodeHuffman createNodeHuffman(char key, char *coded){
 
 unsigned len(const char* s)
 {
-    int count = 0;; int i = 0;
+    int count = 0;
+    int i = 0;
     while (*(s + i) != 0)
     {
         count++;
@@ -65,32 +66,29 @@ nodeHuffman* sortHuffmanTable(nodeHuffman arr[]){
 
 void createHeader(nodeHuffman arr[], char headerToSave[]){
     int cnt = 1; //contatore dei bit
-    char currentByte = 0x00;
+    long currentByte = 0;
 
     for(int i=0; i<256;i++){
         if(arr[i] == NULL){
             break;
         }
-        int dumLenght = len(arr[i]->coded);
+        char *test = arr[i]->coded;
+        int dumLenght = len(test);
+        dumLenght = dumLenght==0?1:dumLenght;
         if(cnt == 1){
             cnt = dumLenght;
         }else if(dumLenght > cnt){
+            currentByte = (currentByte+1)<<dumLenght-cnt;
             cnt = dumLenght;
-            currentByte = (currentByte+1)<<1;
         }else{
-            cnt = dumLenght;
             currentByte = currentByte+1;
         }
-
-        char word[8] = {0};
         char *code = malloc(sizeof(char) * cnt);
 
         for(int l=0;l<cnt;l++){
             if(((currentByte>>(cnt-l-1))&0x01)==0x00){
-                strcat(word, "0");
                 code[l] = '0';
             }else{
-                strcat(word, "1");
                 code[l] = '1';
             }
         }

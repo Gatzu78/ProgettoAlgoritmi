@@ -10,8 +10,8 @@
 #define PROGETTOALGORITMI_TREE_H
 
 struct Tree{
-    char word;
-    float val;
+    unsigned char word;
+    unsigned long val;
     struct Tree *left;
     struct Tree *right;
 };
@@ -19,7 +19,7 @@ struct Tree{
 typedef struct Tree *nodeTree;
 
 
-nodeTree createTree(char word, float val);
+nodeTree createTree(unsigned char word, unsigned long val);
 
 nodeTree mergeTree(nodeTree left, nodeTree right);
 
@@ -52,7 +52,7 @@ nodeFrequency sortFrequency(nodeFrequency hf);
 
 int populateTree(node dic);
 
-void compressString(char *file);
+void compressString(char *file, unsigned long lungfile);
 
 void buildTree();
 

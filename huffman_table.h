@@ -7,16 +7,16 @@
 
 
 struct HuffmanTable{
-    char key;
+    unsigned char key;
     char *coded;
 };
 
 typedef struct HuffmanTable *nodeHuffman;
 
 
-nodeHuffman getHuffmanNodeByKey(nodeHuffman arr[], int arr_size, char key);
+nodeHuffman getHuffmanNodeByKey(nodeHuffman arr[], int arr_size, unsigned char key);
 
-nodeHuffman createNodeHuffman(char key, char *coded);
+nodeHuffman createNodeHuffman(unsigned char key, char *coded);
 
 void printHuffmanTable(nodeHuffman arr[], int arr_size);
 

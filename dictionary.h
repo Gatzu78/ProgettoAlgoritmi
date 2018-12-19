@@ -2,8 +2,8 @@
 #include <stdbool.h>
 
 struct Dictionary{
-    char key;
-    int value;
+    unsigned char key;
+    long value;
     struct Dictionary *next;
 };
 
@@ -13,16 +13,16 @@ node createNode();
 
 bool hasNext(node current);
 
-node getDictionaryByKey(node head, char key);
+node getDictionaryByKey(node head, unsigned char key);
 
 node getLastNode(node head);
 
-int printDictionary(node head);
+long printDictionary(node head);
 
 node insertionSort(node head);
 
-node addNode(node head, char key, int value);
+node addNode(node head, unsigned char key, long value);
 
-node incrementValue(node head, char chiave);
+node incrementValue(node head, unsigned char chiave);
 
-int getTotFrequency(node head);
+long getTotFrequency(node head);
