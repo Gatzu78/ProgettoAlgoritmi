@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <printf.h>
 #include <memory.h>
+#include <stdbool.h>
 #include "huffman_table.h"
 
 nodeHuffman getHuffmanNodeByKey(nodeHuffman arr[], int arr_size, char key){

@@ -3,16 +3,30 @@
 #include <stdlib.h>
 #include "lzss.h"
 #include "huffman.h"
+#include "tree.h"
+
 
 int main(int argc, char *argv[]) {
-    if(argc!=4){
+    node head = NULL;
+
+    char testo[] = "faaaaaaabbbbbcccddededed";
+    int text_size = sizeof(testo)/sizeof(testo[0]);
+    for(long i = 0; i<text_size-1;i++){
+        head = incrementValue(head,testo[i]);
+    }
+
+    populateTree(head);
+
+    compressString(testo);
+
+    buildTree();
+
+    return 0;
+    /*if(argc!=4){
         printf("manca un argomento per la corretta esecutione dell'applicativo\n");
         return 0;
     }
-    /*DEBUG*/
-    printf("%s\n",argv[1]);
-    /*DEBUG*/
-    if ((strcmp(argv[1],"-C")!=0) && (strcmp(argv[1],"-D")!=0)) {
+    if ((strcmp(argv[1],"-C")!=0)||(strcmp(argv[1],"-D")!=0)) {
         printf("non è stato specificato un argomento valido\n");
         return 0;
     }
@@ -20,10 +34,7 @@ int main(int argc, char *argv[]) {
     FILE *fileptr;
     char *buffer;
     long lungfile;
-    char *outputBuffer;
-    /*
-        AGGIUNGERE un controllo se il file esiste.
-    */
+
     fileptr = fopen(argv[2], "rb");     // apertura il file in modalità binaria
     fseek(fileptr, 0, SEEK_END);        // vado alla fine del file
     lungfile = ftell(fileptr)+1;        // memorizza l'offset del file (quanti caratteri ci sono) + 1
@@ -33,19 +44,14 @@ int main(int argc, char *argv[]) {
     fread(buffer, lungfile, 1, fileptr);                                    // legge il file e lo carica in memoria (copia sul buffer)
     fclose(fileptr);                                                        // Chiude il file
 
-    int i = 0;
-    for(i = 2; i<lungfile; i++){
-        printf("%c -> %d\n", buffer[i], buffer[i]);
-    }
-
     if(strcmp(argv[1],"-C")==0){ //Routine di compressione
-        comprimi(buffer,lungfile,outputBuffer,0,0);
+
     }
 
     if(strcmp(argv[1],"-D")==0){ //Routine di decompressione
 
     }
-
+    */
     return 0;
 }
 

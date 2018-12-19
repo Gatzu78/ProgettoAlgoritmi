@@ -29,6 +29,7 @@ FILE* readFile(FILE *fp, char *nameFile){
     return  NULL;
 }
 
+
 void writeByte(FILE *fp, unsigned char codedStr){
     fputc(codedStr, fp);
 }
