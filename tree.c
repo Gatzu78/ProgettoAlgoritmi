@@ -147,9 +147,9 @@ nodeFrequency sortFrequency(nodeFrequency hf){
 
 }
 
-int populateTree(node dic){
+void populateTree(node dic){
     dic = insertionSort(dic);
-    int tot_freq = getTotFrequency(dic);
+    unsigned long tot_freq = getTotFrequency(dic);
     printDictionary(dic);
     printf("Tot Frequency: %d\n", tot_freq);
 
@@ -174,7 +174,9 @@ int populateTree(node dic){
 
         headFrequency = sortFrequency(headFrequency);
     }
+
     int arr[256] = {0};
+
     printTable(headFrequency->tree, arr ,0);
 
     sortHuffmanTable(hfTable);
@@ -183,14 +185,11 @@ int populateTree(node dic){
     createHeader(hfTable,headerFile);
 
     printHuffmanTable(hfTable, 256);
-    return 0;
 }
 
-void compressString(char *file, unsigned long lungfile){
+void compressString(char *file, unsigned long lungfile, char *nameFile){
     FILE *fp = NULL;
-    fp = fopen("test1.funny", "wb");
-
-//    rewind(fp);
+    fp = openFile(fp,"test1.funny",true); //fopen("test1.funny", "wb");
 
     for(int h = 0;h<256;h++){
         writeByte(fp, headerFile[h]);
@@ -199,7 +198,7 @@ void compressString(char *file, unsigned long lungfile){
     unsigned char c;
     int cnt = 0;
     char mask = 0x00;
-    for(int t=0;t<lungfile;t++){//while ((c = *file++) != '\0') {
+    for(int t=0;t<lungfile-1;t++){//while ((c = *file++) != '\0') {
         nodeHuffman dumHuffman = getHuffmanNodeByKey(hfTable, 256, file[t]);
         char *code = dumHuffman->coded;
         unsigned char b;
@@ -221,6 +220,7 @@ void compressString(char *file, unsigned long lungfile){
     mask = mask<<(8-cnt);
     writeByte(fp, mask);
 
+
     //scrito quanto bisogna togliere al byte finale in un byte che terminerà il file compresso
     char bitToRemove = (8-cnt)&15;
     writeByte(fp,bitToRemove);
@@ -229,11 +229,12 @@ void compressString(char *file, unsigned long lungfile){
     closeFile(fp);
 }
 
-void buildTree(){
-    FILE *fp;
+/*
+void buildTree(char *nameFile){
+    FILE *fp = NULL;
     //fp = readFile(fp,"test1");
 
-    fp = fopen("test1.funny", "rb");
+    fp = openFile(fp,nameFile,false); //fopen("test1.funny", "rb");
 
     nodeHuffman headerFile[256] = {0};
     unsigned long cnt;
@@ -289,7 +290,6 @@ void buildTree(){
         }
     }
 
-    printHuffmanTable(headerFile,256);
 
     nodeTree root = createTree(NULL,0);
     for (int k = 0; k < 256; k++) {
@@ -314,12 +314,13 @@ void buildTree(){
 
     }
 
+
     //salvo il gap finale dell'ultimo byte
     char lastByte =  buffer[cnt-1];
     nodeTree  dumRoot = root;
 
     FILE *fd = NULL;
-    fd = openFile(fd,"decompresso",true);
+    fd = openFile(fd,"abc.tiff",true);
 
     for (long l = 0; l < cnt-257; l++) {
         for (long i = 0; i < 8; i++) {
@@ -341,4 +342,4 @@ void buildTree(){
     fclose(fp);
     fclose(fp);
 
-}
+}*/

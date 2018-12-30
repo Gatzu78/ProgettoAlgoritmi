@@ -50,10 +50,10 @@ nodeFrequency removeFrequency(nodeFrequency head, nodeFrequency nf);
 nodeFrequency sortFrequency(nodeFrequency hf);
 
 
-int populateTree(node dic);
+void populateTree(node dic);
 
-void compressString(char *file, unsigned long lungfile);
+void compressString(char *file, unsigned long lungfile, char *nameFile);
 
-void buildTree();
+//void buildTree(char *nameFile);
 
 #endif PROGETTOALGORITMI_TREE_H

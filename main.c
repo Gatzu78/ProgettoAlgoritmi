@@ -4,6 +4,7 @@
 #include "lzss.h"
 #include "huffman.h"
 #include "tree.h"
+#include <time.h>
 
 
 int main(int argc, char *argv[]) {
@@ -31,7 +32,9 @@ int main(int argc, char *argv[]) {
         printf("non è stato specificato un argomento valido\n");
         return 0;
     }*/
-
+    compressFile("32k_ff","test1.funny");
+    decompressFile("test1.funny","32k_ff2");
+/*
     FILE *fileptr;
     unsigned char *buffer;
     int lungfile;
@@ -41,7 +44,7 @@ int main(int argc, char *argv[]) {
     lungfile = ftell(fileptr)+1;        // memorizza l'offset del file (quanti caratteri ci sono) + 1
     rewind(fileptr);                    // torna al'inizio del file
 
-    buffer = ( unsigned char *)malloc((lungfile)*sizeof(unsigned char));    // alloca abbastanza memoria per contenere il file previsto  anche \0
+    buffer = (unsigned char *)malloc((lungfile)*sizeof(unsigned char));    // alloca abbastanza memoria per contenere il file previsto  anche \0
     fread(buffer, lungfile, 1, fileptr);                                    // legge il file e lo carica in memoria (copia sul buffer)
     fclose(fileptr);                                                        // Chiude il file
 
@@ -52,16 +55,24 @@ int main(int argc, char *argv[]) {
         head = incrementValue(head,buffer[i]);
     }
 
-
-
     populateTree(head);
 
-    compressString(buffer,lungfile);
+    compressString(buffer,lungfile, "test1.funny");
 
     free(buffer);
 
-    buildTree();
+    time_t start_t, end_t;
+    double diff_t;
 
+    time(&start_t);
+*/
+  //  buildTree("test1.funny");
+/*
+    time(&end_t);
+    diff_t = difftime(end_t, start_t);
+
+    printf("Execution time = %f\n", diff_t);
+*/
     /*
     if(strcmp(argv[1],"-C")==0){ //Routine di compressione
 

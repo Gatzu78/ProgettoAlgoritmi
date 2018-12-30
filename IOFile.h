@@ -6,8 +6,7 @@
 #ifndef PROGETTOALGORITMI_IOFILE_H
 #define PROGETTOALGORITMI_IOFILE_H
 
-FILE* openFile(FILE *fp, char *nameFile, bool compressName);
-FILE* readFile(FILE *fp, char *nameFile);
+FILE* openFile(FILE *fp, char *nameFile, bool writeable);
 void writeByte(FILE *fp, unsigned char codedStr);
 void closeFile(FILE *fp);
 
