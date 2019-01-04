@@ -14,3 +14,16 @@ char * timeStamp(){
     strftime(buffer, 26, "%Y-%m-%d %H:%M:%S", tm_info);
     return buffer;
 }
+
+void showbits(unsigned int x) {
+    for(int i = (sizeof(int) * 8) - 1; i >= 0; i--) {
+        (x & (1u << i)) ? putchar('1') : putchar('0');
+    }
+    printf("\n");
+}
+
+void emptyString(char * str, int size){
+    for (size;size>0;size--){
+        str[(size-1)]='\0';
+    }
+}

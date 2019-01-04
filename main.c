@@ -1,17 +1,19 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include "utils.h"
 #include "lzss.h"
 #include "huffman.h"
+
 
 int main(int argc, char *argv[]) {
     if(argc!=4){
         printf("manca un argomento per la corretta esecutione dell'applicativo\n");
         return 0;
     }
-    /*DEBUG*/
-    printf("%s\n",argv[1]);
-    /*DEBUG*/
+    #ifdef DEBUG
+    printf("È stato passato l'argomento %s\n",argv[1]);
+    #endif
     if ((strcmp(argv[1],"-C")!=0) && (strcmp(argv[1],"-D")!=0)) {
         printf("non è stato specificato un argomento valido\n");
         return 0;
@@ -32,14 +34,14 @@ int main(int argc, char *argv[]) {
     buffer = ( unsigned char *)malloc((lungfile)*sizeof(unsigned char));    // alloca abbastanza memoria per contenere il file previsto  anche \0
     fread(buffer, lungfile, 1, fileptr);                                    // legge il file e lo carica in memoria (copia sul buffer)
     fclose(fileptr);                                                        // Chiude il file
-
+    #ifdef DEBUG
     int i = 0;
-    for(i = 2; i<lungfile; i++){
+    for(i = 0; i<lungfile; i++){
         printf("%c -> %d\n", buffer[i], buffer[i]);
     }
-
+    #endif
     if(strcmp(argv[1],"-C")==0){ //Routine di compressione
-        comprimi(buffer,lungfile,outputBuffer,0,0);
+        comprimiLZSS(buffer, lungfile, outputBuffer, 0, 0);
     }
 
     if(strcmp(argv[1],"-D")==0){ //Routine di decompressione

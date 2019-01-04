@@ -2,8 +2,13 @@
 // Created by attilio on 15/10/18.
 //
 
+#include <string.h>
 #include "AVL.h"
+#include "utils.h"
 
+
+treeNode *currentTreeRoot;
+int currentTreeSize;
 
 // A utility function to get height of the tree
 int height(struct treeNode *N)
@@ -20,13 +25,15 @@ int max(int a, int b)
     return (a > b)? a : b;
 }
 
-/* Helper function that allocates a new node with the given key and
-    NULL left and right pointers. */
-treeNode* newNode(int realOffset,char* str)
+/*
+ * Helper function that allocates a new node with the given key and
+ * NULL left and right pointers.
+ */
+treeNode* newNode(long realOffset,char str[])
 {
     treeNode* node = (struct treeNode*)malloc(sizeof(struct treeNode));
     node->realOffset  = realOffset;
-    node->str = str;
+    //node->str = str;
     node->left   = NULL;
     node->right  = NULL;
     node->height = 1;  // new node is initially added at leaf
@@ -79,18 +86,20 @@ int getBalance(struct treeNode *N)
     return height(N->left) - height(N->right);
 }
 
-struct treeNode* insert(struct treeNode* node, int key, char* str)
+treeNode* insertNode(struct treeNode *node, long realOffset, char str[])
 {
     /* 1.  Perform the normal BST rotation */
     if (node == NULL)
-        return(newNode(key));
+        return(newNode(realOffset,str));
 
-    if (key < node->key){
-        node->left  = insert(node->left, key);
-    } else if (key > node->key){
-        node->right = insert(node->right, key);
-    } else // Equal keys not allowed
+    if (strcmp(str,node->str)<0){
+        node->left  = insertNode(node->left, realOffset, str);
+    } else if (strcmp(str,node->str)>0){
+        node->right = insertNode(node->right, realOffset, str);
+    } else {// Equal keys update the realOffset
+        node->realOffset=realOffset;
         return node;
+    }
 
     /* 2. Update height of this ancestor node */
     node->height = 1 + max(height(node->left),
@@ -104,22 +113,22 @@ struct treeNode* insert(struct treeNode* node, int key, char* str)
     // If this node becomes unbalanced, then there are 4 cases
 
     // Left Left Case
-    if (balance > 1 && key < node->left->key)
+    if ((balance > 1) && (strcmp(str,node->left->str)<0))
         return rightRotate(node);
 
     // Right Right Case
-    if (balance < -1 && key > node->right->key)
+    if ((balance < -1) && (strcmp(str,node->right->str)>0))
         return leftRotate(node);
 
     // Left Right Case
-    if (balance > 1 && key > node->left->key)
+    if ((balance > 1) && (strcmp(str,node->left->str)>0))
     {
         node->left =  leftRotate(node->left);
         return rightRotate(node);
     }
 
     // Right Left Case
-    if (balance < -1 && key < node->right->key)
+    if ((balance < -1) && (strcmp(str,node->right->str)<0))
     {
         node->right = rightRotate(node->right);
         return leftRotate(node);
@@ -147,7 +156,7 @@ treeNode * minValueNode(treeNode* node)
 // Recursive function to delete a node with given key
 // from subtree with given root. It returns root of
 // the modified subtree.
-treeNode* deleteNode(treeNode* root, int key)
+treeNode* deleteNode(treeNode* root, char str[])
 {
     // STEP 1: PERFORM STANDARD BST DELETE
 
@@ -156,13 +165,13 @@ treeNode* deleteNode(treeNode* root, int key)
 
     // If the key to be deleted is smaller than the
     // root's key, then it lies in left subtree
-    if ( key < root->key )
-        root->left = deleteNode(root->left, key);
+    if (strcmp(str,root->str)<0)
+        root->left = deleteNode(root->left, str);
 
         // If the key to be deleted is greater than the
         // root's key, then it lies in right subtree
-    else if( key > root->key )
-        root->right = deleteNode(root->right, key);
+    else if(strcmp(str,root->str)>0)
+        root->right = deleteNode(root->right, str);
 
         // if key is same as root's key, then This is
         // the node to be deleted
@@ -192,10 +201,10 @@ treeNode* deleteNode(treeNode* root, int key)
             struct treeNode* temp = minValueNode(root->right);
 
             // Copy the inorder successor's data to this node
-            root->key = temp->key;
+            root->str = temp->str;
 
             // Delete the inorder successor
-            root->right = deleteNode(root->right, temp->key);
+            root->right = deleteNode(root->right, temp->str);
         }
     }
 
@@ -236,4 +245,25 @@ treeNode* deleteNode(treeNode* root, int key)
     }
 
     return root;
+}
+
+// Ricerca ricorsiva di un match di stringa.
+treeNode* searchMatch(treeNode * node, char str[]){
+
+    if (node==NULL){
+        /* Sono arrivato in fondo all'albero, non c'è nessun match */
+        return node;
+    }
+    #ifdef DEBUG
+
+        printf("Stringa passata vale = %s, la Stringa nel nodo attuale dell'albero vale = %s \n",str,node->str);
+    #endif
+    if (strncmp(str,node->str,strlen(str))==0) {
+        /* Match trovato, ritorno il nodo */
+        return node;
+    } else if (strncmp(str,node->str,strlen(str))<0){
+        searchMatch(node->left,str);
+    } else if (strncmp(str,node->str,strlen(str))>0){
+        searchMatch(node->right,str);
+    }
 }

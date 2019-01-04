@@ -11,12 +11,15 @@
 typedef struct bufferNode {
     struct bufferNode* next;
     struct bufferNode* previous;
-    struct bufferNode* bufferHead;
     bool isHead;
     bool isTail;
     long offset;
     unsigned char* currentData;
 }bufferNode;
+
+extern bufferNode* currentBufferHead;
+
+bufferNode* originalBufferHead;
 
 unsigned int getGlobalBufferSize();
 void setBufferGlobalParameters(int unsigned bufferSize);

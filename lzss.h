@@ -5,14 +5,19 @@
 #ifndef PROGETTOALGORITMI_LZSS_H
 #define PROGETTOALGORITMI_LZSS_H
 #include "aheadbuffer.h"
+#include "AVL.h"
 #include "utils.h"
-#define FINESTRA    16    //2^16 4096 Offset
-#define LOOKAHEAD    5    //2^5 Lenght
+#include "datawriter.h"
+#define FINESTRA    2048    //2^11 = 2048 Offset
+#define LOOKAHEAD    32    //2^5 = 32 Lenght
 
 
-int comprimi(unsigned char *buffer, long lungfile, char *outPutFileName,int windowSize, int lookAheadSize);
-int decomprimi(unsigned char *buffer, long lungfile, char *outPutFileName);
-void shiftOnSlidingWindow(unsigned char *currentPosition, bufferNode *slidingWindow);
-void loadOnAheadBuffer(unsigned char *currentPosition, bufferNode *slidingWindow);
-
+int comprimiLZSS(unsigned char *buffer, long lungfile, char *outPutFileName, unsigned int windowSize, unsigned int lookAheadSize);
+int decomprimiLZSS(unsigned char *buffer, long lungfile, char *outPutFileName);
+void shiftOnAheadBuffer(int detectedChars);
+void loadOnAheadBuffer(bufferNode *aheadBuffer);
+void stringBuilder(char *str, unsigned char *offsetFromBuffer);
+int evaluateData(treeNode *root);
+formatter * noMatchFound(formatter *passedFormatter,bufferNode *aheadBuffer);
+formatter * matchFound(formatter *passedFormatter,bufferNode *aheadBuffer,int evaluatedBytes,long foundStringOffset);
 #endif //PROGETTOALGORITMI_LZSS_H

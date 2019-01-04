@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include "aheadbuffer.h"
 
+bufferNode* currentBufferHead = NULL;
 static unsigned int globalBufferSize = 0;
 
 //Leggo i parametri globali
@@ -22,16 +23,17 @@ void setBufferGlobalParameters(int unsigned bufferSize){
 // Crea un nodo della linked list e lo aggancia al nodo precedente.
 bufferNode* createBufferNode(bufferNode *previousNode, int size){
     bufferNode* newNode;
-    if((previousNode->previous==NULL)&&previousNode->isHead==false){
-        newNode = previousNode;
+    newNode = malloc(sizeof(bufferNode));
+    //if((previousNode->previous==NULL)&&previousNode->isHead==false){
+    if(previousNode==NULL){
+        //newNode = previousNode;
         printf("Questo è il primo nodo (HEAD)\n");
         newNode->isHead=true;
-        newNode->bufferHead=newNode;
+        currentBufferHead=newNode;
     } else {
-        newNode = previousNode+ sizeof(bufferNode);
+        //newNode = previousNode + sizeof(bufferNode);
         printf("Questo non è il primo nodo\n");
         newNode->isHead=false;
-        newNode->bufferHead=previousNode->bufferHead;
         newNode->previous=previousNode;
         previousNode->next=newNode;
         previousNode->isTail=false;
@@ -41,29 +43,38 @@ bufferNode* createBufferNode(bufferNode *previousNode, int size){
     newNode->isTail=true;
 
     if(size==1){
-        newNode->next=previousNode->bufferHead;
-        newNode->bufferHead->previous=newNode;
+        newNode->next=currentBufferHead;
+        currentBufferHead->previous=newNode;
     }
 
     return newNode;
 }
 
 // crea la linked list usata come finestra e look ahead della dimensione opportuna a seconda dei parametri passati
-bufferNode* createAheadBuffer(int unsigned bufferSize){
+bufferNode* createAheadBuffer(unsigned int bufferSize){
     setBufferGlobalParameters(bufferSize);
     printf("Ho settato la variabile globale per la dimensione del ahead buffer  =%d\n",getGlobalBufferSize());
     int size = globalBufferSize;
-    bufferNode *tempNode=(bufferNode*)calloc(size,sizeof(bufferNode));
+    //originalBufferHead=(bufferNode*)calloc(size,sizeof(bufferNode));
+    //bufferNode *tempNode=originalBufferHead;
+    bufferNode *tempNode=NULL;
     printf("Ho settato un puntatore NULL da passare alla creazione dell'ahead buffer\n");
     for(size;size>0;size--){
         printf("Numero di iterazioni restanti per la creazione della finestra -> %d\n",size);
         tempNode=createBufferNode(tempNode,(size));
     }
-    return tempNode->bufferHead; //restituisce la testa della linked list
+    return currentBufferHead; //restituisce la testa della linked list circolare
 }
 
 void freeAheadBuffer(bufferNode *headNode){
-
     printf("Libero la memoria della finestra\n");
-    free(headNode);
+    bufferNode *currentNode=headNode;
+    bufferNode *nextNode=headNode->next;
+    int i;
+    for(i = getGlobalBufferSize();i>0;i--){
+        free(currentNode);
+        currentNode=nextNode;
+        nextNode=currentNode->next;
+    }
+
 }
