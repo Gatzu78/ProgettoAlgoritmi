@@ -74,7 +74,7 @@ int writeFormatter(formatter * currentFormatter, char * outputPath){
 };
 unsigned char * writeToBuffer(formatter * currentFormatter){
     return "0";
-
+    //non implementato, di fondo servirebbe a passare via puntatote a memoria la codifica.
 }
 int writeToFile(formatter * currentFormatter, char * outputPath){
     #ifdef DEBUGOUTPUT

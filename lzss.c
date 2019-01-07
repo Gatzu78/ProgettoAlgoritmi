@@ -16,9 +16,9 @@ char * globalOutputPath;
 
 
 int comprimiLZSS(unsigned char *buffer, long lungfile, unsigned char *outputBuffer, char * outputPath, unsigned int windowSize, unsigned int lookAheadSize){
+    clock_t tStart = clock();
     originalFileBegining=buffer;
     globalOutputPath=outputPath;
-    clock_t tStart = clock();
     currentTreeRoot=NULL;
     // il programma è predisposto per lavorare con finestra e look ahead passati da linea di comando, ma in questa implementazione iniziale forzo tutto a valori di default.
     if(windowSize!=FINESTRA){
@@ -50,11 +50,9 @@ int comprimiLZSS(unsigned char *buffer, long lungfile, unsigned char *outputBuff
         printf("currentPositionSize è di %ld char(byte)\n",currentPositionOffset);
     #endif
     for(currentPositionOffset;currentPositionOffset<lungfile-1;){
-        //Verificare il reale numero di cicli necessari, soprattutto quando mi avvicino alla fine del file.
         #ifdef DEBUG
             printf("currentBufferHead è '%c',(%ld)\n",*currentBufferHead->currentData,currentBufferHead->offset);
         #endif
-
         int evaluatedBytes = evaluateData(currentTreeRoot); //valuta se i dati nel ahead buffer sono già presenti sull'albero albero.
         shiftOnAheadBuffer(evaluatedBytes); //avanza in base a quanto è riusciuto a codificare.
     }
@@ -190,8 +188,6 @@ void stringBuilder(char *str, unsigned char *offsetFromBuffer){
             str[i]=offsetFromBuffer[i];
         }
     }
-
-
     #ifdef DEBUG
         i=0;
         printf("str vale=");
@@ -203,5 +199,10 @@ void stringBuilder(char *str, unsigned char *offsetFromBuffer){
 }
 
 int decomprimiLZSS(unsigned char *buffer, long lungfile, char *outPutFileName){
+    clock_t tStart = clock();
+    originalFileBegining=buffer;
+    currentPosition=buffer;
+
+    printf("Tempo impiegato per decompressione: %.2fs\n", (double)(clock() - tStart)/CLOCKS_PER_SEC);
     return 0;
 }
