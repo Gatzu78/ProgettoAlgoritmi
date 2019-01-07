@@ -10,7 +10,7 @@ void compressFile(char *inputFile, char *outputFile){
 
     FILE *fileptr;
     unsigned char *buffer;
-    int lungfile;
+    unsigned long long lungfile;
 
     fileptr = fopen(inputFile, "rb");     // apertura il file in modalità binaria
     fseek(fileptr, 0, SEEK_END);        // vado alla fine del file
@@ -24,8 +24,8 @@ void compressFile(char *inputFile, char *outputFile){
     node head = NULL;
 
 
-    for(long i = 0; i<lungfile-1;i++){
-        head = incrementValue(head,buffer[i]);
+    for(long i = 0; i<lungfile-1;i++){                  //leggo tutti i byte del file
+        head = incrementValue(head,buffer[i]);          //ad ogni byte vado ad incrementarne il valore nella mappa
     }
 
     populateTree(head);
@@ -42,7 +42,7 @@ void decompressFile(char *inputFile, char *outputFile){
     fp = openFile(fp,inputFile,false); //fopen("test1.funny", "rb");
 
     nodeHuffman headerFile[256] = {0};
-    unsigned long cnt;
+    unsigned long long cnt;
 
     fseek(fp, 0, SEEK_END);
     cnt = ftell(fp);
@@ -127,8 +127,8 @@ void decompressFile(char *inputFile, char *outputFile){
     FILE *fd = NULL;
     fd = openFile(fd,outputFile,true);
 
-    for (long l = 0; l < cnt-257; l++) {
-        for (long i = 0; i < 8; i++) {
+    for (unsigned long long l = 0; l < cnt-257; l++) {
+        for (int i = 0; i < 8; i++) {
             if(l == cnt-258 && i+lastByte==8){
                 break;
             }

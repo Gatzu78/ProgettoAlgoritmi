@@ -97,5 +97,4 @@ void createHeader(nodeHuffman arr[], char headerToSave[]){
         arr[i]->coded = code;
         headerToSave[index] = cnt;
     }
-    //headerToSave =  header;
 }

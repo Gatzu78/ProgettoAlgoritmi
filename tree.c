@@ -9,9 +9,9 @@
 
 nodeHuffman hfTable[256];
 unsigned char headerFile[256];
-unsigned long currentIndex = 0;
+unsigned long long currentIndex = 0;
 
-nodeTree createTree(unsigned char word, unsigned long val){
+nodeTree createTree(unsigned char word, unsigned long long val){
     nodeTree temp;
     temp = (nodeTree)malloc(sizeof(struct Tree));
     temp->left = NULL;
@@ -149,7 +149,7 @@ nodeFrequency sortFrequency(nodeFrequency hf){
 
 void populateTree(node dic){
     dic = insertionSort(dic);
-    unsigned long tot_freq = getTotFrequency(dic);
+    unsigned long long tot_freq = getTotFrequency(dic);
     printDictionary(dic);
     printf("Tot Frequency: %d\n", tot_freq);
 
@@ -180,16 +180,15 @@ void populateTree(node dic){
     printTable(headFrequency->tree, arr ,0);
 
     sortHuffmanTable(hfTable);
-    //printHuffmanTable(hfTable, 255);
 
     createHeader(hfTable,headerFile);
 
     printHuffmanTable(hfTable, 256);
 }
 
-void compressString(char *file, unsigned long lungfile, char *nameFile){
+void compressString(char *file, unsigned long long lungfile, char *nameFile){
     FILE *fp = NULL;
-    fp = openFile(fp,"test1.funny",true); //fopen("test1.funny", "wb");
+    fp = openFile(fp,nameFile,true);
 
     for(int h = 0;h<256;h++){
         writeByte(fp, headerFile[h]);
@@ -198,7 +197,7 @@ void compressString(char *file, unsigned long lungfile, char *nameFile){
     unsigned char c;
     int cnt = 0;
     char mask = 0x00;
-    for(int t=0;t<lungfile-1;t++){//while ((c = *file++) != '\0') {
+    for(unsigned long long t=0;t<lungfile-1;t++){
         nodeHuffman dumHuffman = getHuffmanNodeByKey(hfTable, 256, file[t]);
         char *code = dumHuffman->coded;
         unsigned char b;
@@ -220,126 +219,9 @@ void compressString(char *file, unsigned long lungfile, char *nameFile){
     mask = mask<<(8-cnt);
     writeByte(fp, mask);
 
-
-    //scrito quanto bisogna togliere al byte finale in un byte che terminerà il file compresso
     char bitToRemove = (8-cnt)&15;
     writeByte(fp,bitToRemove);
 
 
     closeFile(fp);
 }
-
-/*
-void buildTree(char *nameFile){
-    FILE *fp = NULL;
-    //fp = readFile(fp,"test1");
-
-    fp = openFile(fp,nameFile,false); //fopen("test1.funny", "rb");
-
-    nodeHuffman headerFile[256] = {0};
-    unsigned long cnt;
-
-    fseek(fp, 0, SEEK_END);
-    cnt = ftell(fp);
-
-    fseek(fp, 0L, SEEK_SET); //rewind(fp);
-
-
-    char *buffer;
-    buffer = (char *)malloc((cnt+1)*sizeof(char));
-    fread(buffer, cnt, 1, fp);
-
-    //salvo tutto il dizionario
-    int ind = 0;
-    for (int i = 0; i < 256; ++i) {
-        if(buffer[i]!=0x00){
-            int byteLenght = buffer[i];
-            char *elementArray = malloc(sizeof(char) * byteLenght);
-            for(int j = 0;j<byteLenght;j++){
-                elementArray[j] = "0";
-            }
-            headerFile [ind] = createNodeHuffman((unsigned char)i,elementArray);
-            //headerFile [ind] = buffer[i];
-            ind = ind+1;
-        }
-    }
-
-    sortHuffmanTable(headerFile);
-
-    int count = 1;
-    long currentByte = 0x00;
-    for (int k = 0; k < 256; k++) {
-        if(headerFile[k]==NULL){
-            break;
-        }
-        int dumLenght = len(headerFile[k]->coded);
-        if(count == 1){
-            count = dumLenght;
-        }else if(dumLenght > count){
-            currentByte = (currentByte+1)<<dumLenght-count;
-            count = dumLenght;
-        }else{
-            currentByte = currentByte+1;
-        }
-        for(int i = 0;i<dumLenght;i++){
-            if(((currentByte>>(dumLenght-i-1))&0x01)==0x00){
-                headerFile[k]->coded[i] = '0';
-            }else{
-                headerFile[k]->coded[i] = '1';
-            }
-        }
-    }
-
-
-    nodeTree root = createTree(NULL,0);
-    for (int k = 0; k < 256; k++) {
-        if (headerFile[k] == NULL) {
-            break;
-        }
-        nodeTree  dumRoot = root;
-        for(int t = 0; t < len(headerFile[k]->coded);t++){
-            if(headerFile[k]->coded[t]=='0'){
-                if(dumRoot->left == NULL){
-                    dumRoot->left = createTree(NULL,0);
-                }
-                dumRoot = dumRoot->left;
-            }else{
-                if(dumRoot->right == NULL){
-                    dumRoot->right = createTree(NULL,0);
-                }
-                dumRoot = dumRoot->right;
-            }
-        }
-        dumRoot->word = headerFile[k]->key;
-
-    }
-
-
-    //salvo il gap finale dell'ultimo byte
-    char lastByte =  buffer[cnt-1];
-    nodeTree  dumRoot = root;
-
-    FILE *fd = NULL;
-    fd = openFile(fd,"abc.tiff",true);
-
-    for (long l = 0; l < cnt-257; l++) {
-        for (long i = 0; i < 8; i++) {
-            if(l == cnt-258 && i+lastByte==8){
-                break;
-            }
-            if(((buffer[256+l]>>(7-i))&0x01)==0x00){
-                dumRoot = dumRoot->left;
-            }else{
-                dumRoot = dumRoot->right;
-            }
-            if(dumRoot->right == NULL && dumRoot->left == NULL){ //è una foglia
-                writeByte(fd,dumRoot->word);
-                dumRoot = root;
-            }
-        }
-    }
-
-    fclose(fp);
-    fclose(fp);
-
-}*/

@@ -3,7 +3,7 @@
 
 struct Dictionary{
     unsigned char key;
-    long value;
+    unsigned long long value;
     struct Dictionary *next;
 };
 
@@ -17,12 +17,12 @@ node getDictionaryByKey(node head, unsigned char key);
 
 node getLastNode(node head);
 
-long printDictionary(node head);
+unsigned long long printDictionary(node head);
 
 node insertionSort(node head);
 
-node addNode(node head, unsigned char key, long value);
+node addNode(node head, unsigned char key, unsigned long long value);
 
 node incrementValue(node head, unsigned char chiave);
 
-long getTotFrequency(node head);
+unsigned long long getTotFrequency(node head);

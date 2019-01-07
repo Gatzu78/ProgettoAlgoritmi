@@ -20,7 +20,7 @@ nodeHuffman createNodeHuffman(unsigned char key, char *coded);
 
 void printHuffmanTable(nodeHuffman arr[], int arr_size);
 
-unsigned len(const char* s);
+unsigned int len(const char* s);
 
 nodeHuffman* sortHuffmanTable(nodeHuffman arr[]);
 void createHeader(nodeHuffman arr[], char *headerToSave);

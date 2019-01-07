@@ -11,7 +11,7 @@
 
 struct Tree{
     unsigned char word;
-    unsigned long val;
+    unsigned long long val;
     struct Tree *left;
     struct Tree *right;
 };
@@ -19,7 +19,7 @@ struct Tree{
 typedef struct Tree *nodeTree;
 
 
-nodeTree createTree(unsigned char word, unsigned long val);
+nodeTree createTree(unsigned char word, unsigned long long val);
 
 nodeTree mergeTree(nodeTree left, nodeTree right);
 
@@ -52,7 +52,7 @@ nodeFrequency sortFrequency(nodeFrequency hf);
 
 void populateTree(node dic);
 
-void compressString(char *file, unsigned long lungfile, char *nameFile);
+void compressString(char *file, unsigned long long lungfile, char *nameFile);
 
 //void buildTree(char *nameFile);
 
