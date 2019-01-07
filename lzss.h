@@ -12,7 +12,7 @@
 #define LOOKAHEAD    32    //2^5 = 32 Lenght
 
 
-int comprimiLZSS(unsigned char *buffer, long lungfile, char *outPutFileName, unsigned int windowSize, unsigned int lookAheadSize);
+int comprimiLZSS(unsigned char *buffer, long lungfile, unsigned char *outputBuffer, char * outputPath, unsigned int windowSize, unsigned int lookAheadSize);
 int decomprimiLZSS(unsigned char *buffer, long lungfile, char *outPutFileName);
 void shiftOnAheadBuffer(int detectedChars);
 void loadOnAheadBuffer(bufferNode *aheadBuffer);

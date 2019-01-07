@@ -15,8 +15,8 @@ char * timeStamp(){
     return buffer;
 }
 
-void showbits(unsigned int x) {
-    for(int i = (sizeof(int) * 8) - 1; i >= 0; i--) {
+void showbits(unsigned int x, short numExa) {
+    for(int i = (sizeof(int) * numExa) - 1; i >= 0; i--) {
         (x & (1u << i)) ? putchar('1') : putchar('0');
     }
     printf("\n");

@@ -6,11 +6,12 @@
 #define PROGETTOALGORITMI_UTILS_H
 #include <stdio.h>
 #include <time.h>
-#define DEBUG
+//#define DEBUG
+//#define DEBUGOUTPUT
 
 
 char * timeStamp();
-void showbits(unsigned int x);
+void showbits(unsigned int x, short numExa);
 void emptyString(char * str, int size);
 
 #endif //PROGETTOALGORITMI_UTILS_H

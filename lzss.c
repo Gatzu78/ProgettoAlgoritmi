@@ -10,13 +10,16 @@ unsigned char *currentPosition;
 treeNode *currentTreeRoot;
 formatter *currentFormatter;
 unsigned int globalWindowsSize;
+unsigned char *originalFileBegining;
+char * globalOutputPath;
 
 
 
-int comprimiLZSS(unsigned char *buffer, long lungfile, char *outPutFileName, unsigned int windowSize, unsigned int lookAheadSize){
+int comprimiLZSS(unsigned char *buffer, long lungfile, unsigned char *outputBuffer, char * outputPath, unsigned int windowSize, unsigned int lookAheadSize){
+    originalFileBegining=buffer;
+    globalOutputPath=outputPath;
     clock_t tStart = clock();
     currentTreeRoot=NULL;
-    printf("Questo è buffer = %c\n",buffer[1]);
     // il programma è predisposto per lavorare con finestra e look ahead passati da linea di comando, ma in questa implementazione iniziale forzo tutto a valori di default.
     if(windowSize!=FINESTRA){
         windowSize=FINESTRA;
@@ -25,13 +28,17 @@ int comprimiLZSS(unsigned char *buffer, long lungfile, char *outPutFileName, uns
     if(lookAheadSize!=LOOKAHEAD){
         lookAheadSize=LOOKAHEAD;
     }
-    printf("Ho settato le dimensioni della finestra\n");
+    #ifdef DEBUG
+        printf("Ho settato le dimensioni della finestra\n");
+    #endif
     // creo un puntatore alla posizione attuale, in questo caso l'inizio
     currentPosition = buffer;
-    printf("Ho creato un puntatore per tener traccia della posizione nel buffer\n");
+    #ifdef DEBUG
+        printf("Ho creato un puntatore per tener traccia della posizione nel buffer\n");
+    #endif
     //creo la finestra secondo i parametri forniti
     bufferNode *aheadBuffer = createAheadBuffer(lookAheadSize);
-    printf("Ho creato l'ahead buffer\n");
+    //printf("Ho creato l'ahead buffer\n");
     //chiamo il caricamento del buffer
     loadOnAheadBuffer(aheadBuffer);
     /* creo un formater usato per prepare i dati in output*/
@@ -45,8 +52,9 @@ int comprimiLZSS(unsigned char *buffer, long lungfile, char *outPutFileName, uns
     for(currentPositionOffset;currentPositionOffset<lungfile-1;){
         //Verificare il reale numero di cicli necessari, soprattutto quando mi avvicino alla fine del file.
         #ifdef DEBUG
-            printf("Sono alla posizione %ld di %ld, il  valore è: %c\n",currentPositionOffset,lungfile-1,*currentPosition);
+            printf("currentBufferHead è '%c',(%ld)\n",*currentBufferHead->currentData,currentBufferHead->offset);
         #endif
+
         int evaluatedBytes = evaluateData(currentTreeRoot); //valuta se i dati nel ahead buffer sono già presenti sull'albero albero.
         shiftOnAheadBuffer(evaluatedBytes); //avanza in base a quanto è riusciuto a codificare.
     }
@@ -65,10 +73,10 @@ int evaluateData(treeNode *root){
     int i = 0;
     long foundStringOffset=0;
     strncpy(str,(const char *)tempBufferNode->currentData,1);
-    for(i;i<getGlobalBufferSize();i++){
-        matchTreeNode = searchMatch(root,str);
+    for(i;i<getGlobalBufferSize();i++){ //attraverso l'albero alla ricerca di un match con un ciclo for infinito
+        matchTreeNode = searchMatch(root,str); //cerco un nodo in cui ci sia un match
         if(matchTreeNode==NULL){
-            break;
+            break; //break dal for di ricerca nell'albero, no match o arrivato in fondo all'albero
         } else{ /* Trovato un match nell'albero */
             evaluatedBytes++;
             if(evaluatedBytes==1){
@@ -79,7 +87,7 @@ int evaluateData(treeNode *root){
         }
     }
     if (evaluatedBytes<=1){
-        currentFormatter=noMatchFound(currentFormatter,tempBufferNode);
+        currentFormatter=noMatchFound(currentFormatter,currentBufferHead);
         evaluatedBytes=1; // se non ho match oppure ho un solo match, setto di default a 1
     } else{
         currentFormatter=matchFound(currentFormatter,currentBufferHead,evaluatedBytes,foundStringOffset);
@@ -88,7 +96,7 @@ int evaluateData(treeNode *root){
 }
 
 formatter * noMatchFound(formatter *passedFormatter,bufferNode *aheadBuffer){
-    formatter *tempFormatter=addToFormatter(passedFormatter,0,*aheadBuffer->currentData); /* Aggiungo il carattere che non ha match al write buffer */
+    formatter *tempFormatter=addToFormatter(passedFormatter,0,*aheadBuffer->currentData,globalOutputPath); /* Aggiungo il carattere che non ha match al write buffer */
 
     return tempFormatter;
 }
@@ -96,7 +104,7 @@ formatter * noMatchFound(formatter *passedFormatter,bufferNode *aheadBuffer){
 formatter * matchFound(formatter *passedFormatter,bufferNode *aheadBuffer,int evaluatedBytes,long foundStringOffset) {
     // logica per codificare il match di 2 o più caratteri
     long relativeOffset = currentPositionOffset - foundStringOffset; //valutare da che riferimento leggere l'offset di decodifica
-    formatter *tempFormatter=addToFormatter(currentFormatter,(unsigned int)relativeOffset,(unsigned char)evaluatedBytes);
+    formatter *tempFormatter=addToFormatter(currentFormatter,(unsigned int)relativeOffset,(unsigned char)evaluatedBytes,globalOutputPath);
     return tempFormatter;
 }
 
@@ -111,11 +119,13 @@ void addToTree(){
 /* cancella dall'albero la foglia più vecchia finestra+1 */
 void deleteFromTree(){
     if (currentTreeSize>globalWindowsSize){
-        unsigned char* tempOffset = currentPosition -(globalWindowsSize+getGlobalBufferSize()+1);
+        long tempOperator=currentPositionOffset-globalWindowsSize-getGlobalBufferSize();
+        unsigned char* tempOffset = originalFileBegining;
+        tempOffset=tempOffset+tempOperator;
         char str[getGlobalBufferSize()+1];
         stringBuilder(str,tempOffset);
-        currentTreeRoot=deleteNode(currentTreeRoot,str);
-        currentTreeSize--;
+        currentTreeRoot=deleteNode(currentTreeRoot,str,tempOperator);
+        // Rimosso currentTreeSize--
     }
 }
 
@@ -160,7 +170,7 @@ void shiftOnAheadBuffer(int detectedChars) {
         currentPosition++;
         currentPositionOffset++;
         #ifdef DEBUG
-            printf("currentBufferHead->offset=%d\n",(int)currentBufferHead->offset);
+            printf("currentBufferHead->offset=%d\ncurrentBufferHead->currentData='%c'\n",(int)currentBufferHead->offset,*currentBufferHead->currentData);
         #endif
     }
 }
@@ -170,16 +180,18 @@ void stringBuilder(char *str, unsigned char *offsetFromBuffer){
     unsigned int i = 0;
     if (offsetFromBuffer==NULL){
         bufferNode *tempNode = currentBufferHead;
+
         for (i;i<getGlobalBufferSize();i++){
             str[i]=*tempNode->currentData;
             tempNode=tempNode->next;
         }
     } else { /* creare una stringa per fare la delete sull'albero */
         for (i;i<getGlobalBufferSize();i++){
-            str[i]=*offsetFromBuffer;
-            offsetFromBuffer=offsetFromBuffer++;
+            str[i]=offsetFromBuffer[i];
         }
     }
+
+
     #ifdef DEBUG
         i=0;
         printf("str vale=");

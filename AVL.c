@@ -3,6 +3,7 @@
 //
 
 #include <string.h>
+#include <stdbool.h>
 #include "AVL.h"
 #include "utils.h"
 
@@ -33,7 +34,8 @@ treeNode* newNode(long realOffset,char str[])
 {
     treeNode* node = (struct treeNode*)malloc(sizeof(struct treeNode));
     node->realOffset  = realOffset;
-    //node->str = str;
+    node->str = (char*)malloc(STRSIZE*sizeof(char));
+    node->str=strncpy(node->str,str,STRSIZE);
     node->left   = NULL;
     node->right  = NULL;
     node->height = 1;  // new node is initially added at leaf
@@ -89,8 +91,9 @@ int getBalance(struct treeNode *N)
 treeNode* insertNode(struct treeNode *node, long realOffset, char str[])
 {
     /* 1.  Perform the normal BST rotation */
-    if (node == NULL)
+    if (node == NULL){
         return(newNode(realOffset,str));
+    }
 
     if (strcmp(str,node->str)<0){
         node->left  = insertNode(node->left, realOffset, str);
@@ -98,6 +101,7 @@ treeNode* insertNode(struct treeNode *node, long realOffset, char str[])
         node->right = insertNode(node->right, realOffset, str);
     } else {// Equal keys update the realOffset
         node->realOffset=realOffset;
+        currentTreeSize--;
         return node;
     }
 
@@ -156,47 +160,50 @@ treeNode * minValueNode(treeNode* node)
 // Recursive function to delete a node with given key
 // from subtree with given root. It returns root of
 // the modified subtree.
-treeNode* deleteNode(treeNode* root, char str[])
+treeNode* deleteNode(treeNode* root, char str[], long checkOffset)
 {
-    // STEP 1: PERFORM STANDARD BST DELETE
+    bool deleted=false;
 
-    if (root == NULL)
+    // STEP 1: PERFORM STANDARD BST DELETE
+    // Albero vuoto
+    if (root == NULL){
         return root;
+    }
 
     // If the key to be deleted is smaller than the
     // root's key, then it lies in left subtree
     if (strcmp(str,root->str)<0)
-        root->left = deleteNode(root->left, str);
+        root->left = deleteNode(root->left, str,checkOffset);
 
         // If the key to be deleted is greater than the
         // root's key, then it lies in right subtree
     else if(strcmp(str,root->str)>0)
-        root->right = deleteNode(root->right, str);
+        root->right = deleteNode(root->right, str,checkOffset);
 
         // if key is same as root's key, then This is
-        // the node to be deleted
-    else
+        // the node to be deleted, check for offset match, otherwise I skip
+    else if(checkOffset==root->realOffset)
     {
+        deleted=true;
         // node with only one child or no child
         if( (root->left == NULL) || (root->right == NULL) )
         {
-            struct treeNode *temp = root->left ? root->left :
-                                root->right;
+            struct treeNode *temp = root->left ? root->left : root->right;
 
             // No child case
             if (temp == NULL)
             {
                 temp = root;
                 root = NULL;
+            } else { // One child case
+                *root = *temp; // Copy the contents of the non-empty child
             }
-            else // One child case
-                *root = *temp; // Copy the contents of
-            // the non-empty child
+
+            //free(temp->str);
             free(temp);
-        }
-        else
-        {
-            // node with two children: Get the inorder
+
+        } else { // node with two children: Get the inorder
+
             // successor (smallest in the right subtree)
             struct treeNode* temp = minValueNode(root->right);
 
@@ -204,8 +211,13 @@ treeNode* deleteNode(treeNode* root, char str[])
             root->str = temp->str;
 
             // Delete the inorder successor
-            root->right = deleteNode(root->right, temp->str);
+            root->right = deleteNode(root->right, temp->str,checkOffset);
         }
+    }
+
+    if(deleted==true){
+      // valutare cosa mettere qui
+      currentTreeSize--;
     }
 
     // If the tree had only one node then return
@@ -249,7 +261,6 @@ treeNode* deleteNode(treeNode* root, char str[])
 
 // Ricerca ricorsiva di un match di stringa.
 treeNode* searchMatch(treeNode * node, char str[]){
-
     if (node==NULL){
         /* Sono arrivato in fondo all'albero, non c'è nessun match */
         return node;
@@ -262,8 +273,8 @@ treeNode* searchMatch(treeNode * node, char str[]){
         /* Match trovato, ritorno il nodo */
         return node;
     } else if (strncmp(str,node->str,strlen(str))<0){
-        searchMatch(node->left,str);
+        searchMatch(node->left,str); // cerco a sinistra
     } else if (strncmp(str,node->str,strlen(str))>0){
-        searchMatch(node->right,str);
+        searchMatch(node->right,str); // cerco a destra
     }
 }
