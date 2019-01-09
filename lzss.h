@@ -8,12 +8,13 @@
 #include "AVL.h"
 #include "utils.h"
 #include "datawriter.h"
+#include "datadecoder.h"
 #define FINESTRA    2048    //2^11 = 2048 Offset
 #define LOOKAHEAD    32    //2^5 = 32 Lenght
 
 
 int comprimiLZSS(unsigned char *buffer, long lungfile, unsigned char *outputBuffer, char * outputPath, unsigned int windowSize, unsigned int lookAheadSize);
-int decomprimiLZSS(unsigned char *buffer, long lungfile, char *outPutFileName);
+int decomprimiLZSS(unsigned char *buffer, long lungfile, char *outputPath);
 void shiftOnAheadBuffer(int detectedChars);
 void loadOnAheadBuffer(bufferNode *aheadBuffer);
 void stringBuilder(char *str, unsigned char *offsetFromBuffer);

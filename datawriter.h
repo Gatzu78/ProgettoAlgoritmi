@@ -5,6 +5,8 @@
 #ifndef PROGETTOALGORITMI_DATAWRITER_H
 #define PROGETTOALGORITMI_DATAWRITER_H
 
+#include <stdio.h>
+
 #define BLOCKSIZE 8
 
 extern int formatterWriteSelector;
@@ -19,10 +21,10 @@ typedef struct formatter{
 
 formatter * newFormatter();
 int deleteFormatter(formatter * currentFormatter);
-formatter * addToFormatter(formatter * currentFormatter, unsigned int offset, unsigned char posRight, char * outputPath);
-int writeFormatter(formatter * currentFormatter, char * outputPath);
+formatter * addToFormatter(formatter *currentFormatter, unsigned int offset, unsigned char posRight, FILE *fileptr);
+int writeFormatter(formatter *currentFormatter, FILE *fileptr);
 unsigned char *  writeToBuffer(formatter * currentFormatter);
-int writeToFile(formatter * currentFormatter, char * outputPath);
+int writeToFile(formatter *currentFormatter, FILE *fileptr);
 
 
 #endif //PROGETTOALGORITMI_DATAWRITER_H

@@ -6,7 +6,6 @@
 #include "datawriter.h"
 #include "utils.h"
 
-int firstWrite=true;
 int formatterWriteSelector = 1;
 
 
@@ -25,9 +24,9 @@ int deleteFormatter(formatter * currentFormatter){
     free(currentFormatter);
 };
 
-formatter * addToFormatter(formatter * currentFormatter, unsigned int offset, unsigned char data, char * outputPath){
+formatter * addToFormatter(formatter *currentFormatter, unsigned int offset, unsigned char posRight, FILE *fileptr){
     if(currentFormatter->count>7){
-        writeFormatter(currentFormatter,outputPath);
+        writeFormatter(currentFormatter,fileptr);
         deleteFormatter(currentFormatter);
         currentFormatter=newFormatter();
     }
@@ -43,7 +42,7 @@ formatter * addToFormatter(formatter * currentFormatter, unsigned int offset, un
         currentFormatter->istructionCoder[currentFormatter->count]=0;
         currentFormatter->bitIndex=currentFormatter->bitIndex<<1;
         currentFormatter->bitIndex+=0;
-        currentFormatter->bitCoded[currentFormatter->count]=data;
+        currentFormatter->bitCoded[currentFormatter->count]=posRight;
         currentFormatter->count++;
         #ifdef DEBUG
             showbits(currentFormatter->bitCoded[currentFormatter->count]); // stampa la codifica
@@ -55,7 +54,7 @@ formatter * addToFormatter(formatter * currentFormatter, unsigned int offset, un
         currentFormatter->bitIndex+=1;
         currentFormatter->bitCoded[currentFormatter->count]=offset;
         currentFormatter->bitCoded[currentFormatter->count]=currentFormatter->bitCoded[currentFormatter->count]<<5;
-        currentFormatter->bitCoded[currentFormatter->count]+=(unsigned int)data;
+        currentFormatter->bitCoded[currentFormatter->count]+=(unsigned int)posRight;
         currentFormatter->count++;
         #ifdef DEBUG
             showbits(currentFormatter->bitCoded[currentFormatter->count]); // stampa la codifica
@@ -64,30 +63,23 @@ formatter * addToFormatter(formatter * currentFormatter, unsigned int offset, un
     return currentFormatter;
 };
 
-int writeFormatter(formatter * currentFormatter, char * outputPath){
+int writeFormatter(formatter *currentFormatter, FILE *fileptr){
 
     if(formatterWriteSelector==0){
         writeToBuffer(currentFormatter);
     } else {
-        writeToFile(currentFormatter,outputPath);
+        writeToFile(currentFormatter,fileptr);
     }
 };
 unsigned char * writeToBuffer(formatter * currentFormatter){
     return "0";
     //non implementato, di fondo servirebbe a passare via puntatote a memoria la codifica.
 }
-int writeToFile(formatter * currentFormatter, char * outputPath){
+int writeToFile(formatter *currentFormatter, FILE *fileptr){
     #ifdef DEBUGOUTPUT
         printf("Indice = ");
         showbits(currentFormatter->bitIndex,2);
     #endif
-    FILE *fileptr;
-    if (firstWrite==true){
-        fileptr = fopen(outputPath, "wb"); //sovrascrive se il file esiste
-        firstWrite=false;
-    } else {
-        fileptr = fopen(outputPath, "ab"); //appende i dati al file esistente
-    }
     fwrite(&currentFormatter->bitIndex,1,sizeof(unsigned char),fileptr);
     int i=0;
     for(i;i<BLOCKSIZE;i++){
@@ -116,9 +108,6 @@ int writeToFile(formatter * currentFormatter, char * outputPath){
             #endif
             fwrite(&j,sizeof(unsigned char),1,fileptr);
         }
-
     }
-    fclose(fileptr);
-
     return 0;
 }

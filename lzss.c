@@ -11,14 +11,14 @@ treeNode *currentTreeRoot;
 formatter *currentFormatter;
 unsigned int globalWindowsSize;
 unsigned char *originalFileBegining;
-char * globalOutputPath;
+FILE *fileptr;
 
 
 
 int comprimiLZSS(unsigned char *buffer, long lungfile, unsigned char *outputBuffer, char * outputPath, unsigned int windowSize, unsigned int lookAheadSize){
     clock_t tStart = clock();
+    fileptr = fopen(outputPath, "wb"); //sovrascrive se il file esiste
     originalFileBegining=buffer;
-    globalOutputPath=outputPath;
     currentTreeRoot=NULL;
     // il programma è predisposto per lavorare con finestra e look ahead passati da linea di comando, ma in questa implementazione iniziale forzo tutto a valori di default.
     if(windowSize!=FINESTRA){
@@ -58,6 +58,7 @@ int comprimiLZSS(unsigned char *buffer, long lungfile, unsigned char *outputBuff
     }
 
     freeAheadBuffer(aheadBuffer);
+    fclose(fileptr);
     printf("Tempo impiegato per compressione: %.2fs\n", (double)(clock() - tStart)/CLOCKS_PER_SEC);
     return 0;
 };
@@ -94,15 +95,15 @@ int evaluateData(treeNode *root){
 }
 
 formatter * noMatchFound(formatter *passedFormatter,bufferNode *aheadBuffer){
-    formatter *tempFormatter=addToFormatter(passedFormatter,0,*aheadBuffer->currentData,globalOutputPath); /* Aggiungo il carattere che non ha match al write buffer */
+    formatter *tempFormatter=addToFormatter(passedFormatter,0,*aheadBuffer->currentData,fileptr); /* Aggiungo il carattere che non ha match al write buffer */
 
     return tempFormatter;
 }
 
 formatter * matchFound(formatter *passedFormatter,bufferNode *aheadBuffer,int evaluatedBytes,long foundStringOffset) {
     // logica per codificare il match di 2 o più caratteri
-    long relativeOffset = currentPositionOffset - foundStringOffset; //valutare da che riferimento leggere l'offset di decodifica
-    formatter *tempFormatter=addToFormatter(currentFormatter,(unsigned int)relativeOffset,(unsigned char)evaluatedBytes,globalOutputPath);
+    long relativeOffset = currentPositionOffset - (foundStringOffset+(int)LOOKAHEAD); //valutare da che riferimento leggere l'offset di decodifica
+    formatter *tempFormatter=addToFormatter(currentFormatter,(unsigned int)relativeOffset,(unsigned char)evaluatedBytes,fileptr);
     return tempFormatter;
 }
 
@@ -198,11 +199,48 @@ void stringBuilder(char *str, unsigned char *offsetFromBuffer){
     #endif
 }
 
-int decomprimiLZSS(unsigned char *buffer, long lungfile, char *outPutFileName){
+int decomprimiLZSS(unsigned char *buffer, long lungfile, char *outputPath){
     clock_t tStart = clock();
     originalFileBegining=buffer;
     currentPosition=buffer;
+    fileptr = fopen(outputPath, "wb+"); //sovrascrive se il file esiste
+    decoder * currentDecoder=newDecoder();
+    for(currentPositionOffset=0;currentPositionOffset<lungfile;){
+        if(currentDecoder->count==8){
+            writeDecoder(currentDecoder,fileptr);
+            deleteDecoder(currentDecoder);
+            currentDecoder=newDecoder();
+        }
+        /* process the buffer to prepare data to be decoded */
+        int i=0;
+        long tempJump=0;
+        unsigned char evaluate= *currentPosition;
+        currentPosition++;
+        currentPositionOffset++;
+        for(i;i<=7;i++){
+            char tempEvaluate=evaluate>>((int)7-i);
+              currentDecoder->istructionDecoder[i]=(unsigned short)(tempEvaluate & 0x1);
+              if(currentDecoder->istructionDecoder[i]==0){
+                  currentDecoder->bitCoded[i]=*currentPosition;
+                  currentPosition++;
+                  currentPositionOffset++;
+                  currentDecoder->count++;
+                  tempJump+=1;
+              }else{
+                  currentDecoder->bitCoded[i]=*currentPosition;
+                  currentDecoder->bitCoded[i]=currentDecoder->bitCoded[i]<<8;
+                  currentPosition++;
+                  currentPositionOffset++;
+                  currentDecoder->bitCoded[i]+=*currentPosition;
+                  currentPosition++;
+                  currentPositionOffset++;
+                  currentDecoder->count++;
+                  tempJump+=2;
+              }
+        }
 
+    }
+    fclose(fileptr); //chiude il file
     printf("Tempo impiegato per decompressione: %.2fs\n", (double)(clock() - tStart)/CLOCKS_PER_SEC);
     return 0;
 }
