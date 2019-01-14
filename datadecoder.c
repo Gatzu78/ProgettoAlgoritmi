@@ -21,12 +21,15 @@ int deleteDecoder(decoder * currentDecoder){
 decoder * addToDecoder(decoder * currentDecoder, unsigned int offset, unsigned char posRight, FILE *fileptr);
 int writeDecoder(decoder * currentDecoder, FILE *fileptr){
     int i = 0;
-    for(i;i<8;i++){
+    for(i;i<currentDecoder->count;i++){
         if(currentDecoder->istructionDecoder[i]==0){
+            if(currentDecoder->bitCoded[i]==0){
+                break;
+            }
         #ifdef DEBUGOUTPUT
             printf("%c",currentDecoder->bitCoded[i]);
-        #endif
             printf("Prima della scrittura %ld\n", ftell(fileptr));
+        #endif
             fwrite(&currentDecoder->bitCoded[i],sizeof(unsigned char),1,fileptr);
             fflush(fileptr);
         } else{
@@ -35,7 +38,9 @@ int writeDecoder(decoder * currentDecoder, FILE *fileptr){
             jump=jump>>5;
             unsigned char buffer[numChars];
             fseek(fileptr,-jump,SEEK_END);
-            printf("Prima della lettura %ld\n", ftell(fileptr));
+            #ifdef DEBUGOUTPUT
+                printf("Prima della lettura %ld\n", ftell(fileptr));
+            #endif
             fread(&buffer,sizeof(unsigned char),numChars,fileptr);
             fflush(fileptr);
             #ifdef DEBUGOUTPUT
@@ -45,7 +50,9 @@ int writeDecoder(decoder * currentDecoder, FILE *fileptr){
                 }
             #endif
             fseek(fileptr,0,SEEK_END);
-            printf("Prima della scrittura %ld\n", ftell(fileptr));
+            #ifdef DEBUGOUTPUT
+                printf("Prima della scrittura %ld\n", ftell(fileptr));
+            #endif
             fwrite(&buffer,sizeof(unsigned char),numChars,fileptr);
             fflush(fileptr);
             }

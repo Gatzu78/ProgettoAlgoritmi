@@ -22,9 +22,9 @@ typedef struct formatter{
 formatter * newFormatter();
 int deleteFormatter(formatter * currentFormatter);
 formatter * addToFormatter(formatter *currentFormatter, unsigned int offset, unsigned char posRight, FILE *fileptr);
-int writeFormatter(formatter *currentFormatter, FILE *fileptr);
+int writeFormatter(formatter *currentFormatter, FILE *fileptr, bool isLast);
 unsigned char *  writeToBuffer(formatter * currentFormatter);
-int writeToFile(formatter *currentFormatter, FILE *fileptr);
+int writeToFile(formatter *currentFormatter, FILE *fileptr, bool isLast);
 
 
 #endif //PROGETTOALGORITMI_DATAWRITER_H

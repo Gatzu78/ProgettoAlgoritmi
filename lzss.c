@@ -11,6 +11,8 @@ treeNode *currentTreeRoot;
 formatter *currentFormatter;
 unsigned int globalWindowsSize;
 unsigned char *originalFileBegining;
+bufferNode * currentBufferHead;
+bool useTree = false;
 FILE *fileptr;
 
 
@@ -49,21 +51,91 @@ int comprimiLZSS(unsigned char *buffer, long lungfile, unsigned char *outputBuff
         printf("Il file caricato in memoria è composto da %ld char(byte)\n",lungfile);
         printf("currentPositionSize è di %ld char(byte)\n",currentPositionOffset);
     #endif
-    for(currentPositionOffset;currentPositionOffset<lungfile-1;){
+    for(currentPositionOffset;currentPositionOffset<lungfile;){
         #ifdef DEBUG
             printf("currentBufferHead è '%c',(%ld)\n",*currentBufferHead->currentData,currentBufferHead->offset);
         #endif
-        int evaluatedBytes = evaluateData(currentTreeRoot); //valuta se i dati nel ahead buffer sono già presenti sull'albero albero.
+        int evaluatedBytes=0;
+        if(useTree){
+            evaluatedBytes = evaluateDataTree(currentTreeRoot); //valuta se i dati nel ahead buffer sono già presenti sull'albero albero.
+        }else{
+            evaluatedBytes=evaluateDataWindow(); //valuta se i dati nel ahead buffer sono già presenti nella finestra.
+        }
         shiftOnAheadBuffer(evaluatedBytes); //avanza in base a quanto è riusciuto a codificare.
     }
 
+    long svuotaBuffer=currentBufferHead->offset;
+    for(svuotaBuffer;svuotaBuffer<lungfile;svuotaBuffer++){
+        int evaluatedBytes=0;
+        if(useTree){
+            evaluatedBytes=evaluateDataTree(currentTreeRoot); //valuta se i dati nel ahead buffer sono già presenti sull'albero albero.
+        }else{
+            evaluatedBytes=evaluateDataWindow(); //valuta se i dati nel ahead buffer sono già presenti nella finestra.
+        }
+        shiftOnAheadBuffer(evaluatedBytes); //avanza in base a quanto è riusciuto a codificare.
+    }
+    writeFormatter(currentFormatter,fileptr,true);
+    free(currentFormatter);
     freeAheadBuffer(aheadBuffer);
     fclose(fileptr);
     printf("Tempo impiegato per compressione: %.2fs\n", (double)(clock() - tStart)/CLOCKS_PER_SEC);
     return 0;
-};
+}
 
-int evaluateData(treeNode *root){
+int evaluateDataWindow(){
+    unsigned char * tempFileBuffer=originalFileBegining;
+    bufferNode * tempBufferNode=currentBufferHead;
+    long i = 0;
+    if (tempBufferNode->offset>FINESTRA){
+        i=tempBufferNode->offset-FINESTRA;
+    }
+    long lastValidOffsetFound=-1;
+    int lastValidBytesFound=0;
+    long offsetFound=-1;
+    int bytesFound=0;
+    for(i;i<currentBufferHead->offset;i++){
+         if(*currentBufferHead->currentData=='\000'){
+             break;
+         }
+         if(*tempBufferNode->currentData==tempFileBuffer[i]){
+             offsetFound=i;
+             bytesFound++;
+             if((offsetFound>(currentBufferHead->offset-2))&&(offsetFound<(currentBufferHead->offset+31))){ // caso speciale, vado a vedere anche nell'ahead buffer.
+                //Implementare
+             }
+             if(tempBufferNode->next->isHead==false){
+                 tempBufferNode=tempBufferNode->next;
+             }else{ //sono arrivato in fondo al buffer circolare ed ho trovato qualcosa
+                 if(bytesFound>lastValidBytesFound){ // se il match trovato è meglio di quello precedente
+                     lastValidOffsetFound=(offsetFound-bytesFound)+1;
+                     lastValidBytesFound=bytesFound;
+                 }
+                 break;
+             }
+
+         } else { // char non uguale
+             if(bytesFound>0){ // se loop precedente ha prodotto un match
+                 if(bytesFound>lastValidBytesFound){ // se il match trovato è meglio di quello precedente
+                     lastValidOffsetFound=(offsetFound-bytesFound)+1;
+                     lastValidBytesFound=bytesFound;
+                 }
+                 offsetFound=-1;
+                 bytesFound=0;
+                 tempBufferNode=currentBufferHead;
+             }
+         }
+    }
+    if (lastValidBytesFound <= 1) { // casi in cui non ho trovato match oppure non conviene comprimere
+        currentFormatter=addToFormatter(currentFormatter,0,*currentBufferHead->currentData,fileptr);
+        lastValidBytesFound=1;
+    } else {
+        unsigned int relativeOffset=(unsigned int)(currentBufferHead->offset-lastValidOffsetFound);
+        currentFormatter=addToFormatter(currentFormatter,relativeOffset,(unsigned char)lastValidBytesFound,fileptr);
+    }
+    return lastValidBytesFound;
+}
+
+int evaluateDataTree(treeNode *root){
     treeNode *matchTreeNode;
     bufferNode *tempBufferNode=currentBufferHead;
     int evaluatedBytes=0;
@@ -96,7 +168,6 @@ int evaluateData(treeNode *root){
 
 formatter * noMatchFound(formatter *passedFormatter,bufferNode *aheadBuffer){
     formatter *tempFormatter=addToFormatter(passedFormatter,0,*aheadBuffer->currentData,fileptr); /* Aggiungo il carattere che non ha match al write buffer */
-
     return tempFormatter;
 }
 
@@ -156,8 +227,10 @@ void loadOnAheadBuffer(bufferNode *aheadBuffer){
 void shiftOnAheadBuffer(int detectedChars) {
     bufferNode* tempNode = currentBufferHead;
     for(detectedChars;detectedChars>0;detectedChars--){
-        addToTree(); // aggiunge una foglia all'albero con il contenuto dell' aheadbuffer
-        deleteFromTree(); // elimina la foglia più vecchia dell'albero, solo quando si riempe.
+        if(useTree){
+            deleteFromTree(); // elimina la foglia più vecchia dell'albero, solo quando si riempe.
+            addToTree(); // aggiunge una foglia all'albero con il contenuto dell' aheadbuffer
+        }
         tempNode->isHead=false;
         tempNode->next->isHead=true;
         tempNode->isTail=true;

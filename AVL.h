@@ -7,7 +7,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#define STRSIZE    33
+#define STRSIZE    32
 
 typedef struct treeNode
 {

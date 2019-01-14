@@ -15,6 +15,7 @@ formatter * newFormatter(){
     currentFormatter->bitIndex=0;
     int i=0;
     for(i;i<BLOCKSIZE;i++){
+        currentFormatter->istructionCoder[i]=0;
         currentFormatter->bitCoded[i]=0;
     }
     return currentFormatter;
@@ -26,7 +27,7 @@ int deleteFormatter(formatter * currentFormatter){
 
 formatter * addToFormatter(formatter *currentFormatter, unsigned int offset, unsigned char posRight, FILE *fileptr){
     if(currentFormatter->count>7){
-        writeFormatter(currentFormatter,fileptr);
+        writeFormatter(currentFormatter, fileptr, false);
         deleteFormatter(currentFormatter);
         currentFormatter=newFormatter();
     }
@@ -63,33 +64,36 @@ formatter * addToFormatter(formatter *currentFormatter, unsigned int offset, uns
     return currentFormatter;
 };
 
-int writeFormatter(formatter *currentFormatter, FILE *fileptr){
+int writeFormatter(formatter *currentFormatter, FILE *fileptr, bool isLast) {
 
     if(formatterWriteSelector==0){
         writeToBuffer(currentFormatter);
     } else {
-        writeToFile(currentFormatter,fileptr);
+        writeToFile(currentFormatter, fileptr, isLast);
     }
 };
 unsigned char * writeToBuffer(formatter * currentFormatter){
     return "0";
     //non implementato, di fondo servirebbe a passare via puntatote a memoria la codifica.
 }
-int writeToFile(formatter *currentFormatter, FILE *fileptr){
+int writeToFile(formatter *currentFormatter, FILE *fileptr, bool isLast) {
     #ifdef DEBUGOUTPUT
         printf("Indice = ");
         showbits(currentFormatter->bitIndex,2);
     #endif
     fwrite(&currentFormatter->bitIndex,1,sizeof(unsigned char),fileptr);
     int i=0;
-    for(i;i<BLOCKSIZE;i++){
+    for(i;i<currentFormatter->count;i++){
         if(currentFormatter->istructionCoder[i]==0){
             #ifdef DEBUGOUTPUT
                 printf("Non compresso = ");
                 showbits(currentFormatter->bitCoded[i],2);
             #endif
             fwrite(&currentFormatter->bitCoded[i],sizeof(unsigned char),1,fileptr);
-        }else{
+            if(currentFormatter->bitCoded[i]==0){
+                break;
+            }
+        } else {
             #ifdef DEBUGOUTPUT
                 printf("Compresso = ");
                 showbits(currentFormatter->bitCoded[i],4);
@@ -108,6 +112,9 @@ int writeToFile(formatter *currentFormatter, FILE *fileptr){
             #endif
             fwrite(&j,sizeof(unsigned char),1,fileptr);
         }
+    }
+    if(isLast==true){
+        // metodo preparato per aggiungere un eventuale \0 come fine codifica.
     }
     return 0;
 }
