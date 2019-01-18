@@ -24,7 +24,7 @@ void compressFile(char *inputFile, char *outputFile){
     node head = NULL;
 
 
-    for(long i = 0; i<lungfile-1;i++){                  //leggo tutti i byte del file
+    for(unsigned long long i = 0; i<lungfile-1;i++){                  //leggo tutti i byte del file
         head = incrementValue(head,buffer[i]);          //ad ogni byte vado ad incrementarne il valore nella mappa
     }
 
