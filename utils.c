@@ -4,15 +4,15 @@
 
 #include "utils.h"
 
-char buffer[26];
+char timeStringBuffer[26];
 
 char * timeStamp(){
     time_t timer;
     struct tm* tm_info;
     time(&timer);
     tm_info = localtime(&timer);
-    strftime(buffer, 26, "%Y-%m-%d %H:%M:%S", tm_info);
-    return buffer;
+    strftime(timeStringBuffer, 26, "%Y-%m-%d %H:%M:%S", tm_info);
+    return timeStringBuffer;
 }
 
 void showbits(unsigned int x, short numExa) {
@@ -26,4 +26,12 @@ void emptyString(char * str, int size){
     for (size;size>0;size--){
         str[(size-1)]='\0';
     }
+}
+
+char* concat(const char *s1, const char *s2)
+{
+    char *result = malloc(strlen(s1) + strlen(s2) + 1); // +1 per il terminatore /0
+    strcpy(result, s1);
+    strcat(result, s2);
+    return result;
 }
