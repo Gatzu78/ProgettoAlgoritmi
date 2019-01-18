@@ -289,6 +289,7 @@ int decomprimiLZSS(unsigned char *buffer, long lungfile, char *outputPath){
         long tempJump=0;
         unsigned char evaluate= *currentPosition;
         currentPosition++;
+
         currentPositionOffset++;
         for(i;i<=7;i++){
             char tempEvaluate=evaluate>>((int)7-i);
