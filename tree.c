@@ -11,6 +11,9 @@ nodeHuffman hfTable[256];
 unsigned char headerFile[256];
 unsigned long long currentIndex = 0;
 
+/**
+ * Questa funzione crea un nuovo sottoalbero, che è nodo di un albero
+ */
 nodeTree createTree(unsigned char word, unsigned long long val){
     nodeTree temp;
     temp = (nodeTree)malloc(sizeof(struct Tree));
@@ -21,6 +24,9 @@ nodeTree createTree(unsigned char word, unsigned long long val){
     return temp;
 }
 
+/**
+ * Questa funzione collega due alberi (left e right) ritornando il nodo di collegamento
+ */
 nodeTree mergeTree(nodeTree left, nodeTree right){
     nodeTree temp;
     temp = (nodeTree)malloc(sizeof(struct Tree));
@@ -30,13 +36,20 @@ nodeTree mergeTree(nodeTree left, nodeTree right){
     return temp;
 }
 
+/**
+ * ritorna il figlio sinistro del nodo passato
+ */
 nodeTree getLeftChild(nodeTree nt){
     return nt->left;
 }
 
+/**
+ * ritorna il figlio destro del nodo passato
+ */
 nodeTree getRightChild(nodeTree nt){
     return nt->right;
 }
+
 
 void showtree(nodeTree nt){
     if(nt!=NULL){
@@ -61,6 +74,9 @@ char* printArr(int arr[], int n) {
     return digit;
 }
 
+/**
+ * Questa funzione serve per poter costruire l'array partendo dall'albero
+ */
 void printTable(nodeTree nt, int digit[], int size_digit){
     if(nt->left){
         digit[size_digit] = 0;
@@ -79,6 +95,9 @@ void printTable(nodeTree nt, int digit[], int size_digit){
     }
 }
 
+/*
+ * crea un nodo base per l'albero delle frequenze
+ */
 nodeFrequency createFrequencyNode(nodeTree tree){
     nodeFrequency temp = (nodeFrequency)malloc(sizeof(struct FrequencyList));
     temp->tree = tree;
@@ -86,6 +105,9 @@ nodeFrequency createFrequencyNode(nodeTree tree){
     return temp;
 }
 
+/**
+ * aggiunge il nodo di frequenza alla fine della lista
+ */
 nodeFrequency addFrequencyNode(nodeFrequency head, nodeTree tree){
     nodeFrequency temp = head;
     if(temp==NULL){
@@ -99,6 +121,9 @@ nodeFrequency addFrequencyNode(nodeFrequency head, nodeTree tree){
     return head;
 }
 
+/**
+ * rimuove il nodo di frequenza dalla lista
+ */
 nodeFrequency removeFrequency(nodeFrequency head, nodeFrequency nf){
     if(head==nf){
         head = head->next;
@@ -117,6 +142,9 @@ nodeFrequency removeFrequency(nodeFrequency head, nodeFrequency nf){
 
 }
 
+/**
+ * con l'ausilio di un inserion sort, questa funzione ordina tutta la lista di frequenze in base alla frequenza
+ */
 nodeFrequency sortFrequency(nodeFrequency hf){
     nodeFrequency head = hf;
     nodeFrequency temp = hf;
@@ -147,11 +175,13 @@ nodeFrequency sortFrequency(nodeFrequency hf){
 
 }
 
+/**
+ * Questa funzione, ricevuto come parametro il dizionario, crea l'albero delle frequenze
+ *
+ */
 void populateTree(node dic){
     dic = insertionSort(dic);
     unsigned long long tot_freq = getTotFrequency(dic);
-    printDictionary(dic);
-    printf("Tot Frequency: %d\n", tot_freq);
 
     node temp = dic;
 
@@ -182,10 +212,11 @@ void populateTree(node dic){
     sortHuffmanTable(hfTable);
 
     createHeader(hfTable,headerFile);
-
-    printHuffmanTable(hfTable, 256);
 }
 
+/**
+ * questa funzione, ricevuto come parametro il file, con l'ausilio delle strutture, genera il file compresso
+ */
 void compressString(char *file, unsigned long long lungfile, char *nameFile){
     FILE *fp = NULL;
     fp = openFile(fp,nameFile,true);

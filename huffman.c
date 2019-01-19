@@ -6,6 +6,11 @@
 #include "huffman.h"
 #include "tree.h"
 
+/**
+ * questa funzione viene chiamata per comprimere il file
+ * @param inputFile file da comprimere
+ * @param outputFile nome del file finale dove salvare la compressione
+ */
 void compressFile(char *inputFile, char *outputFile){
 
     FILE *fileptr;
@@ -24,22 +29,28 @@ void compressFile(char *inputFile, char *outputFile){
     node head = NULL;
 
 
-    for(long i = 0; i<lungfile-1;i++){                  //leggo tutti i byte del file
+    for(unsigned long long i = 0; i<lungfile-1;i++){                  //leggo tutti i byte del file
         head = incrementValue(head,buffer[i]);          //ad ogni byte vado ad incrementarne il valore nella mappa
     }
 
+    //preparo l'albero che viene poi utilizzato per la compressione
     populateTree(head);
 
+    //pronte tutte le strutture di appoggio, vado a lavorare direttamente sul file per comprimerlo
     compressString(buffer,lungfile, outputFile);
 
     free(buffer);
 }
 
+/**
+ * questa funzione viene chiamata per decomprimere il file
+ * @param inputFile file da decomprimere
+ * @param outputFile nome del file finale dove salvare il file decompresso
+ */
 void decompressFile(char *inputFile, char *outputFile){
     FILE *fp = NULL;
-    //fp = readFile(fp,"test1");
 
-    fp = openFile(fp,inputFile,false); //fopen("test1.funny", "rb");
+    fp = openFile(fp,inputFile,false); //apro il file in input
 
     nodeHuffman headerFile[256] = {0};
     unsigned long long cnt;
@@ -47,14 +58,13 @@ void decompressFile(char *inputFile, char *outputFile){
     fseek(fp, 0, SEEK_END);
     cnt = ftell(fp);
 
-    fseek(fp, 0L, SEEK_SET); //rewind(fp);
-
+    fseek(fp, 0L, SEEK_SET);
 
     char *buffer;
     buffer = (char *)malloc((cnt+1)*sizeof(char));
     fread(buffer, cnt, 1, fp);
 
-    //salvo tutto il dizionario
+    //salvo tutto il dizionario, ovvero l'header che sono i primi 255 caratteri
     int ind = 0;
     for (int i = 0; i < 256; ++i) {
         if(buffer[i]!=0x00){
@@ -64,15 +74,16 @@ void decompressFile(char *inputFile, char *outputFile){
                 elementArray[j] = "0";
             }
             headerFile [ind] = createNodeHuffman((unsigned char)i,elementArray);
-            //headerFile [ind] = buffer[i];
             ind = ind+1;
         }
     }
 
+    //creo il mio huffman table (ovvero la chiave valore per ogni carattere)
     sortHuffmanTable(headerFile);
 
     int count = 1;
     long currentByte = 0x00;
+    //lavoro tutto l'header, in modo da creare la codifica per ogni carattere che viene trovato
     for (int k = 0; k < 256; k++) {
         if(headerFile[k]==NULL){
             break;
@@ -86,6 +97,7 @@ void decompressFile(char *inputFile, char *outputFile){
         }else{
             currentByte = currentByte+1;
         }
+        //per ogni codifica devo andare a lavorare sui singoli caratteri, cercando di capire se è uno 0 o 1
         for(int i = 0;i<dumLenght;i++){
             if(((currentByte>>(dumLenght-i-1))&0x01)==0x00){
                 headerFile[k]->coded[i] = '0';
@@ -95,7 +107,8 @@ void decompressFile(char *inputFile, char *outputFile){
         }
     }
 
-
+    //una volta creata la codifica preparo l'albero
+    //questo facilita molto la decompressione
     nodeTree root = createTree(NULL,0);
     for (int k = 0; k < 256; k++) {
         if (headerFile[k] == NULL) {
@@ -118,7 +131,6 @@ void decompressFile(char *inputFile, char *outputFile){
         dumRoot->word = headerFile[k]->key;
 
     }
-
 
     //salvo il gap finale dell'ultimo byte
     char lastByte =  buffer[cnt-1];
@@ -143,8 +155,6 @@ void decompressFile(char *inputFile, char *outputFile){
             }
         }
     }
-
-    fclose(fp);
     fclose(fp);
 
 }

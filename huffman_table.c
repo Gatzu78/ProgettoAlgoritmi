@@ -8,6 +8,9 @@
 #include <stdbool.h>
 #include "huffman_table.h"
 
+/**
+ * viene ritornato il nodo di huffman ricevendo come parametro l'array in cui cercare la key
+ */
 nodeHuffman getHuffmanNodeByKey(nodeHuffman arr[], int arr_size, unsigned char key){
     for(int i=0; i<arr_size;i++){
         if(arr[i] == NULL){
@@ -19,6 +22,9 @@ nodeHuffman getHuffmanNodeByKey(nodeHuffman arr[], int arr_size, unsigned char k
     }
 }
 
+/**
+ * viene utilizzata per il debug, per stampare a terminale la tabella
+ */
 void printHuffmanTable(nodeHuffman arr[], int arr_size){
     for(int i=0; i<arr_size;i++){
         if(arr[i] == NULL){
@@ -28,6 +34,9 @@ void printHuffmanTable(nodeHuffman arr[], int arr_size){
     }
 }
 
+/**
+ * funzione utilizzata per creare un nuovo nodo per l'header
+ */
 nodeHuffman createNodeHuffman(unsigned char key, char *coded){
     nodeHuffman temp;
     temp = (nodeHuffman)malloc(sizeof(struct HuffmanTable));
@@ -36,6 +45,9 @@ nodeHuffman createNodeHuffman(unsigned char key, char *coded){
     return temp;
 }
 
+/**
+ * funzione che passata una stringa, ritorna la sua lunghezza
+ */
 unsigned len(const char* s)
 {
     int count = 0;
@@ -48,6 +60,11 @@ unsigned len(const char* s)
     return count;
 }
 
+/**
+ * Funzione che, tramite l'ausilio di un insertion sort, riordina per lunghezza e poi in ordine alfabetico, tutta l'heaer
+ * @param arr
+ * @return
+ */
 nodeHuffman* sortHuffmanTable(nodeHuffman arr[]){
     for(int i=0; i<256;i++){
         if(arr[i] == NULL){
@@ -64,6 +81,9 @@ nodeHuffman* sortHuffmanTable(nodeHuffman arr[]){
     return arr;
 }
 
+/**
+ * funzione utilizzata per creare l'header
+ */
 void createHeader(nodeHuffman arr[], char headerToSave[]){
     int cnt = 1; //contatore dei bit
     long currentByte = 0;

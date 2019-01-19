@@ -1,6 +1,9 @@
 #include <printf.h>
 #include "dictionary.h"
 
+/**
+ * crea un nuovo nodo e lo ritorna
+ */
 node createNode(){
     node temp;
     temp = (node)malloc(sizeof(struct Dictionary));
@@ -8,6 +11,9 @@ node createNode(){
     return temp;
 }
 
+/**
+ * questa funzione torna ture se il nodo ha un successivo nodo, altrimenti false
+ */
 bool hasNext(node current){
     if(current == NULL || current->next==NULL){
         return false;
@@ -15,6 +21,11 @@ bool hasNext(node current){
     return true;
 }
 
+/*
+ * questa funzione riceve come parametro il nodo iniziale e lo percorre tutto fin quando non trova la chiave
+ * se trova la chiave ritorna il nodo
+ * se non lo trova, ritorna NULL
+ */
 node getDictionaryByKey(node head, unsigned char key){
     if(head==NULL){
         return NULL;
@@ -34,6 +45,9 @@ node getDictionaryByKey(node head, unsigned char key){
     }
 }
 
+/*
+ * viene ritornato l'ultimo nodo della lista
+ */
 node getLastNode(node head){
     if(head==NULL){
         return head;
@@ -101,6 +115,9 @@ node insertionSort(node head){
     return head;
 }
 
+/*
+ * funzione che aggiunge un nuovo nodo al dizionario
+ */
 node addNode(node head, unsigned char key, unsigned long long value){
     node temp = createNode();
     node last = getLastNode(head);
@@ -115,6 +132,9 @@ node addNode(node head, unsigned char key, unsigned long long value){
     return head;
 }
 
+/*
+ * riceve come parametro la testa della lista e la chiave. Se la chiave viene trovata, allora il suo valore viene incrementato di 1
+ */
 node incrementValue(node head, unsigned char chiave){
     node diz = getDictionaryByKey(head, chiave);
     if(diz != NULL){
@@ -125,6 +145,9 @@ node incrementValue(node head, unsigned char chiave){
     return head;
 }
 
+/*
+ * ritorna il totale di frequenze
+ */
 unsigned long long getTotFrequency(node head){
     int current = 0;
     while(head!=NULL){
