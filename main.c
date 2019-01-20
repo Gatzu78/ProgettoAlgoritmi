@@ -37,6 +37,7 @@ int loadFile(FILE *fileptr, long *lungfile, char *filePath) {
 
 
 int main(int argc, char *argv[]) {
+    clock_t tStart = clock();
     if(argc!=4){
         printf("manca un argomento per la corretta esecutione dell'applicativo\n");
         return 0;
@@ -59,26 +60,34 @@ int main(int argc, char *argv[]) {
         printf("Il percorso di output è %s\n", outputPath);
     #endif
         if(strcmp(argv[1],"-C")==0){ //Routine di compressione
-                if((loadFile(fileptr, &lungfile, argv[2]) == 1)){
-                    return 1;
-                } else {
+            if((loadFile(fileptr, &lungfile, argv[2]) == 1)){
+                return 1;
+            } else {
+                printf("Inizio modalità compressione\n");
+                printf("Inizio LZSS:\n");
                 char *tempFileOutputPath=concat(outputPath,".temp"); //fa una malloc
                 comprimiLZSS(fileBuffer, lungfile, outputBuffer, tempFileOutputPath, 0, 0);
+                printf("\nInizio HUFFMAN:\n");
                 compressFile(tempFileOutputPath,outputPath);
                 free(tempFileOutputPath);
+                printf("\nTempo TOTALE impiegato per compressione: %.2fs\n", (double)(clock() - tStart)/CLOCKS_PER_SEC);
                 return 0;
-                }
+            }
         }
 
         if(strcmp(argv[1],"-D")==0){ //Routine di decompressione
+            printf("Inizio modalità decompressione\n");
+            printf("Inizio HUFFMAN:\n");
             char *tempFileOutputPath=concat(outputPath,".temp"); //fa una malloc
             decompressFile(argv[2],tempFileOutputPath);
+            printf("Inizio LZSS:\n");
             if((loadFile(fileptr, &lungfile, tempFileOutputPath) == 1)){
                 return 1;
             } else {
                 decomprimiLZSS(fileBuffer, lungfile, outputPath);
             }
             free(tempFileOutputPath);
+            printf("\nTempo TOTALE impiegato per decompressione: %.2fs\n", (double)(clock() - tStart)/CLOCKS_PER_SEC);
         }
     }
 

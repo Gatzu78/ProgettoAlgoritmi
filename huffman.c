@@ -2,6 +2,7 @@
 // Created by attilio on 08/10/18.
 //
 
+#include <stdio.h>
 #include <stdlib.h>
 #include "huffman.h"
 #include "tree.h"
@@ -12,6 +13,7 @@
  * @param outputFile nome del file finale dove salvare la compressione
  */
 void compressFile(char *inputFile, char *outputFile){
+    clock_t tStart = clock();
 
     FILE *fileptr;
     unsigned char *buffer;
@@ -40,6 +42,7 @@ void compressFile(char *inputFile, char *outputFile){
     compressString(buffer,lungfile, outputFile);
 
     free(buffer);
+    printf("Tempo impiegato per compressione: %.2fs\n", (double)(clock() - tStart)/CLOCKS_PER_SEC);
 }
 
 /**
@@ -48,9 +51,12 @@ void compressFile(char *inputFile, char *outputFile){
  * @param outputFile nome del file finale dove salvare il file decompresso
  */
 void decompressFile(char *inputFile, char *outputFile){
+    clock_t tStart = clock();
     FILE *fp = NULL;
 
+
     fp = openFile(fp,inputFile,false); //apro il file in input
+
 
     nodeHuffman headerFile[256] = {0};
     unsigned long long cnt;
@@ -107,6 +113,7 @@ void decompressFile(char *inputFile, char *outputFile){
         }
     }
 
+
     //una volta creata la codifica preparo l'albero
     //questo facilita molto la decompressione
     nodeTree root = createTree(NULL,0);
@@ -132,6 +139,7 @@ void decompressFile(char *inputFile, char *outputFile){
 
     }
 
+
     //salvo il gap finale dell'ultimo byte
     char lastByte =  buffer[cnt-1];
     nodeTree  dumRoot = root;
@@ -156,5 +164,5 @@ void decompressFile(char *inputFile, char *outputFile){
         }
     }
     fclose(fp);
-
+    printf("Tempo impiegato per la decompressione: %.2fs\n", (double)(clock() - tStart)/CLOCKS_PER_SEC);
 }
